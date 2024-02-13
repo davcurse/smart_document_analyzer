@@ -1,1 +1,5 @@
-Smart Document Analyzer
+# Smart Document Analyzer
+
+David Li
+* Project 2
+* EC530
