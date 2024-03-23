@@ -1,25 +1,20 @@
-import sqlite3
 from getpass import getpass
 import tkinter as tk
 from tkinter import filedialog
 import os
-
-# Connect to the SQLite database (creates a new file if it doesn't exist)
-conn = sqlite3.connect('./Database/database.db')
-c = conn.cursor()
-
-# Create a table to store the authentication if it doesn't exist
-c.execute('''CREATE TABLE IF NOT EXISTS data
-             (username TEXT UNIQUE, password TEXT)''')
+import shutil
+import logging
+import PyPDF2
+import re
 
 
-def register_user():
+def register_user(conn, cursor):
     # Prompt user for username
     username = input("Enter a new username: ")
 
     # check if user exists
-    c.execute("SELECT * FROM data WHERE username=?", (username,))
-    existing_user = c.fetchone()
+    cursor.execute("SELECT * FROM data WHERE username=?", (username,))
+    existing_user = cursor.fetchone()
     if existing_user:
         print("Username already exists. Choose a different username or login.")
         conn.close()
@@ -29,12 +24,12 @@ def register_user():
     password = getpass("Enter a password: ")
     confirm_password = getpass("Confirm your password: ")
     if password == confirm_password:
-        c.execute("INSERT INTO data (username, password)\
-                   VALUES (?, ?)",
-                  (username, password))
+        cursor.execute("INSERT INTO data (username, password)\
+                   VALUES (?, ?)", (username, password))
         conn.commit()
         print(f"New user '{username}' registered successfully.")
         print(f"You can now login as '{username}'.")
+        logging.info(f"New user '{username}' registered successfully.")
         conn.close()
         exit()
     else:
@@ -43,11 +38,11 @@ def register_user():
         exit()
 
 
-def login_user():
+def login_user(conn, cursor):
     username = input("Enter your username: ")
     # check if user exists
-    c.execute("SELECT * FROM data WHERE username=?", (username,))
-    existing_user = c.fetchone()
+    cursor.execute("SELECT * FROM data WHERE username=?", (username,))
+    existing_user = cursor.fetchone()
     if not existing_user:
         print(f"Sorry, the user, '{username}' does not exist.")
         conn.close()
@@ -65,10 +60,26 @@ def login_user():
         password = getpass("Enter your password: ")
 
     print(f"\nWelcome '{username}'.")
+    logging.info(f"User '{username}' logged in successfully.")
     return existing_user[0]  # Return the user ID
 
 
-def file_manage(user_id):
+def count_words_in_pdf(file_path):
+    with open(file_path, 'rb') as file:
+        reader = PyPDF2.PdfReader(file)
+        num_pages = len(reader.pages)
+        text = ""
+        for page in range(num_pages):
+            text += reader.pages[page].extract_text()
+
+    # Remove non-word characters and split the text into words
+    words = re.findall(r'\b\w+\b', text)
+    word_count = len(words)
+
+    return word_count
+
+
+def file_manage(user_id, conn, cursor):
     while True:
         print("_______________")
         print("\nSelect an option:")
@@ -79,9 +90,9 @@ def file_manage(user_id):
         choice = input("Enter your choice (1-4): ")
         if choice == '1':
             # View files
-            c.execute("SELECT * FROM uploaded_files WHERE user_id=?",
-                      (user_id,))
-            files = c.fetchall()
+            cursor.execute("SELECT * FROM uploaded_files WHERE user_id=?",
+                           (user_id,))
+            files = cursor.fetchall()
             if files:
                 print("Your files:")
                 for file in files:
@@ -95,53 +106,83 @@ def file_manage(user_id):
             root.withdraw()  # Hide the main window
             filepath = filedialog.askopenfilename(title="Select a file")
             if filepath:
+
+                # Extract file name and extension
                 filename = os.path.basename(filepath)
-                # Extract file extension without the dot
                 filetype = os.path.splitext(filename)[1][1:]
 
                 # Find the next available ID
-                c.execute("SELECT MAX(id) FROM uploaded_files")
-                max_id = c.fetchone()[0]
+                cursor.execute("SELECT MAX(id) FROM uploaded_files")
+                max_id = cursor.fetchone()[0]
                 next_id = max_id + 1 if max_id else 1
 
-                c.execute(
+                # Create a folder to store the uploaded files
+                upload_folder = "uploaded_files"
+                if not os.path.exists(upload_folder):
+                    os.makedirs(upload_folder)
+
+                # Copy the uploaded file to the upload folder
+                destination_path = os.path.join(upload_folder, filename)
+                shutil.copy2(filepath, destination_path)
+
+                # Count number of words in pdf
+                word_count = count_words_in_pdf(filepath)
+
+                # Insert uploaded folder into database
+                cursor.execute(
                     "INSERT INTO uploaded_files "
-                    "(user_id, file_name, file_type, file_path) "
-                    "VALUES (?, ?, ?, ?)",
-                    (next_id, user_id, filename, filetype, filepath)
+                    "(id,user_id,file_name,file_type,file_path,word_count)"
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (next_id, user_id, filename, filetype, filepath,
+                     word_count)
                 )
-                c.execute("UPDATE data SET files = files + 1"
-                          " WHERE id = ?", (user_id,))
+
+                # Increment file count per user
+                cursor.execute("UPDATE data SET files = files + 1"
+                               " WHERE id = ?", (user_id,))
+
                 conn.commit()
                 print(f"File '{filename}' uploaded successfully.")
+                logging.info(f"File '{filename}' uploaded successfully.")
             else:
                 print("No file selected.")
 
         elif choice == '3':
-            c.execute("SELECT * FROM uploaded_files WHERE user_id=?",
-                      (user_id,))
-            files = c.fetchall()
+
+            # Print user's files
+            cursor.execute("SELECT * FROM uploaded_files WHERE user_id=?",
+                           (user_id,))
+            files = cursor.fetchall()
             if files:
                 print("Your files:")
                 for file in files:
                     print(f"ID: {file[0]}, {file[2]}")
-                # Delete a file
+
+                # Ask user which file to delete
                 file_id = input("Enter the ID of the file to delete"
                                 " (0 to cancel): ")
                 if file_id != '0':
-                    c.execute(
+                    # Delete file form data base
+                    cursor.execute(
                         "SELECT * FROM uploaded_files WHERE id=? AND\
                         user_id=?",
                         (file_id, user_id)
                     )
-                    file = c.fetchone()
+                    file = cursor.fetchone()
                     if file:
-                        c.execute("DELETE FROM uploaded_files WHERE id=?",
-                                  (file_id,))
-                        c.execute("UPDATE data SET files = files - 1"
-                                  " WHERE id = ?", (user_id,))
+                        cursor.execute("DELETE FROM uploaded_files WHERE id=?",
+                                       (file_id,))
+                        cursor.execute("UPDATE data SET files = files - 1"
+                                       " WHERE id = ?", (user_id,))
+
+                        # Delete file from uploaded_files folder
+                        file_path = "./uploaded_files/" + file[2]
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+
                         conn.commit()
                         print(f"File '{file[2]}' deleted successfully.")
+                        logging.info(f"File '{file[2]}' deleted successfully.")
                     else:
                         print("File not found or you don't have permission "
                               "to delete it.")
@@ -151,39 +192,12 @@ def file_manage(user_id):
                 print("\nYou have no files to delete.")
 
         elif choice == '4':
-            c.execute("SELECT username FROM data WHERE id = ?",
-                      (user_id,))
-            username = c.fetchone()[0]
+            cursor.execute("SELECT username FROM data WHERE id = ?",
+                           (user_id,))
+            username = cursor.fetchone()[0]
             print(f"'{username}' signed out.")
             conn.close()
             exit()
 
         else:
             print("Invalid choice. Please try again.")
-
-
-def main():
-    while True:
-        print("\nSelect an option:")
-        print("1. Register a new user")
-        print("2. Login")
-        print("3. Exit")
-        choice = input("Enter your choice (1-3): ")
-        if choice == '1':
-            register_user()
-        elif choice == '2':
-            user_id = login_user()
-            if user_id:
-                file_manage(user_id)
-        elif choice == '3':
-            break
-        else:
-            print("Invalid choice. Please try again.")
-
-    # Close the database connection
-    if conn:
-        conn.close()
-
-
-if __name__ == '__main__':
-    main()
