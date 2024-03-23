@@ -6,20 +6,24 @@ cursor = conn.cursor()
 
 # Create the authentication table
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS authentication (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE IF NOT EXISTS data (
+        id INTEGER PRIMARY KEY,
         username TEXT NOT NULL,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        files INTEGER DEFAULT 0
     )
 ''')
 
-# Create the uploaded_files table
+# Create the uploaded_files table with a foreign key referencing
+# authentication table
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS uploaded_files (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
         file_name TEXT NOT NULL,
         file_type TEXT NOT NULL,
-        file_path TEXT NOT NULL
+        file_path TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES data (id)
     )
 ''')
 

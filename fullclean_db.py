@@ -1,4 +1,5 @@
 import sqlite3
+import os
 
 
 def clear_database(db_file):
@@ -17,6 +18,7 @@ def clear_database(db_file):
             c.execute(f"DELETE FROM {table}")
             if table != "sqlite_sequence":
                 print(f"Cleared table: {table}")
+        delete_file("./Database/database.db")
         print("Database cleared successfully.")
     else:
         print("Aborting full clean.")
@@ -24,6 +26,14 @@ def clear_database(db_file):
     # Commit the changes and close the connection
     conn.commit()
     conn.close()
+
+
+def delete_file(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        print(f"File '{file_path}' deleted successfully.")
+    else:
+        print(f"File '{file_path}' does not exist.")
 
 
 # Specify the path to your SQLite database file
