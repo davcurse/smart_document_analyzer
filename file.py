@@ -6,6 +6,7 @@ import shutil
 import logging
 import PyPDF2
 import re
+import docx
 
 
 def register_user(conn, cursor):
@@ -64,19 +65,32 @@ def login_user(conn, cursor):
     return existing_user[0]  # Return the user ID
 
 
-def count_words_in_pdf(file_path):
-    with open(file_path, 'rb') as file:
-        reader = PyPDF2.PdfReader(file)
-        num_pages = len(reader.pages)
-        text = ""
-        for page in range(num_pages):
-            text += reader.pages[page].extract_text()
-
-    # Remove non-word characters and split the text into words
-    words = re.findall(r'\b\w+\b', text)
-    word_count = len(words)
-
-    return word_count
+def count_words(file_path):
+    _, extension = os.path.splitext(file_path)
+    if extension == '.pdf':
+        with open(file_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            num_pages = len(reader.pages)
+            text = ""
+            for page in range(num_pages):
+                text += reader.pages[page].extract_text()
+        # Remove non-word characters and split the text into words
+        words = re.findall(r'\b\w+\b', text)
+        word_count = len(words)
+        return word_count
+    elif extension == '.txt':
+        with open(file_path, 'r') as file:
+            content = file.read()
+            words = re.findall(r'\b\w+\b', content)
+            return len(words)
+    elif extension in ['.doc', '.docx']:
+        doc = docx.Document(file_path)
+        word_count = 0
+        for para in doc.paragraphs:
+            word_count += len(re.findall(r'\b\w+\b', para.text))
+        return word_count
+    else:
+        return 0
 
 
 def file_manage(user_id, conn, cursor):
@@ -96,7 +110,7 @@ def file_manage(user_id, conn, cursor):
             if files:
                 print("Your files:")
                 for file in files:
-                    print(f"ID: {file[0]}, {file[2]}")
+                    print(f"ID: {file[0]}, {file[2]}\n  Word Count: {file[5]}")
             else:
                 print("You have no files.")
 
@@ -126,7 +140,7 @@ def file_manage(user_id, conn, cursor):
                 shutil.copy2(filepath, destination_path)
 
                 # Count number of words in pdf
-                word_count = count_words_in_pdf(filepath)
+                word_count = count_words(filepath)
 
                 # Insert uploaded folder into database
                 cursor.execute(
