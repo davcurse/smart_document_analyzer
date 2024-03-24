@@ -23,7 +23,7 @@ An easy to use command-line based program to store, view, and manipulate documen
 ## Installation
 
 1. Clone the repository
-2. Run the application with ```python3.11 main_test.py``` or python3.x version of your choice
+2. Run the application with ```python3.11 test_main.py``` or python3.x version of your choice
 3. Once logged in, you can:
 - View uploaded files
 - Upload new files
@@ -37,7 +37,7 @@ An easy to use command-line based program to store, view, and manipulate documen
 
 ## File Structure
 
-- `main_test.py`: The main entry point of the application
+- `test_main.py`: The main entry point of the application
 - `file.py`: Contains functions for user registration, login, and file management
 - `database.py`: Handles database initialization and creation of tables
 - `fullclean_db.py`: Provides functions for clearing the database and deleting files

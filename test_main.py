@@ -6,7 +6,7 @@ from database import database_init
 from fullclean_db import clear_database
 
 
-def main():
+def test_main():
     db_file = './Database/database.db'
 
 # Clean the database and folders
