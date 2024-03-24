@@ -4,7 +4,7 @@ from tkinter import filedialog
 import os
 import shutil
 import logging
-import PyPDF2
+import pypdf
 import re
 import docx
 
@@ -69,7 +69,7 @@ def count_words(file_path):
     _, extension = os.path.splitext(file_path)
     if extension == '.pdf':
         with open(file_path, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
+            reader = pypdf.PdfReader(file)
             num_pages = len(reader.pages)
             text = ""
             for page in range(num_pages):
