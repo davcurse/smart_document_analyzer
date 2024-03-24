@@ -48,6 +48,38 @@ An easy to use command-line based program to store, view, and manipulate documen
 
 The application logs various events and user actions to the `app.log` file. The log file includes timestamps, log levels, and log messages for tracking and debugging purposes.
 
+## Example Use
+<p align="center">
+<img src="./images/2.png" width="80%">
+</p>
+<p align="center">
+Cleaning and generating new database.
+</p>
+<p align="center">
+<img src="./images/1.png" width="80%">
+</p>
+<p align="center">
+Registration Prompt.
+</p>
+<p align="center">
+<img src="./images/3.png" width="80%">
+</p>
+<p align="center">
+Successful login and file manage options.
+</p>
+<p align="center">
+<img src="./images/4.png" width="80%">
+</p>
+<p align="center">
+Viewing files. (Textbooks have large word counts!)
+</p>
+<p align="center">
+<img src="./images/5.png" width="80%">
+</p>
+<p align="center">
+Deleting file clears it from the database for the logged in user and removes from stored directory.
+</p>
+
 
 ## License
 
