@@ -23,7 +23,7 @@ An easy to use command-line based program to store, view, and manipulate documen
 ## Installation
 
 1. Clone the repository
-2. Run the application with ```python3.11 main_test.py```
+2. Run the application with ```python3.11 main_test.py``` or python3.x version of your choice
 3. Once logged in, you can:
 - View uploaded files
 - Upload new files
