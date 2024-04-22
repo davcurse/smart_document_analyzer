@@ -1,6 +1,0 @@
-word
-apple
-banana
-cherry
-diamond
-david

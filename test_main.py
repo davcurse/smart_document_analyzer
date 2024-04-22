@@ -67,6 +67,7 @@ if __name__ == '__main__':
     main()
 
 
+# For pytest
 def test_main(monkeypatch, capsys):
 
     db_file = './Database/database.db'
