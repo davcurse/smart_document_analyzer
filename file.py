@@ -9,9 +9,10 @@ import re
 import docx
 
 
-def register_user(conn, cursor):
+def register_user(conn, cursor, username, password):
     # Prompt user for username
-    username = input("Enter a new username: ")
+    if username == 'INPUT':
+        username = input("Enter a new username: ")
 
     # check if user exists
     cursor.execute("SELECT * FROM data WHERE username=?", (username,))
@@ -19,43 +20,49 @@ def register_user(conn, cursor):
     if existing_user:
         print("Username already exists. Choose a different username or login.")
         conn.close()
-        exit()
+        exit(0)
 
     # Prompt user for password and confirmation
-    password = getpass("Enter a password: ")
-    confirm_password = getpass("Confirm your password: ")
+    if password == 'INPUT':
+        password = getpass("Enter a password: ")
+        confirm_password = getpass("Confirm your password: ")
+    else:
+        confirm_password = password
+
     if password == confirm_password:
         cursor.execute("INSERT INTO data (username, password)\
-                   VALUES (?, ?)", (username, password))
+                VALUES (?, ?)", (username, password))
         conn.commit()
         print(f"New user '{username}' registered successfully.")
         print(f"You can now login as '{username}'.")
         logging.info(f"New user '{username}' registered successfully.")
         conn.close()
-        exit()
+        exit(0)
     else:
         print("Passwords do not match. Registration failed.")
         conn.close()
-        exit()
+        exit(0)
 
 
-def login_user(conn, cursor):
-    username = input("Enter your username: ")
+def login_user(conn, cursor, username, password):
+    if username == 'INPUT':
+        username = input("Enter your username: ")
     # check if user exists
-    cursor.execute("SELECT * FROM data WHERE username=?", (username,))
+    cursor.execute("SELECT * FROM data WHERE username= ? ", (username,))
     existing_user = cursor.fetchone()
     if not existing_user:
         print(f"Sorry, the user, '{username}' does not exist.")
         conn.close()
-        exit()
+        exit(0)
 
-    password = getpass("Enter your password: ")
+    if password == 'INPUT':
+        password = getpass("Enter your password: ")
     count = 1
     while existing_user and password != existing_user[2]:
         if count == 5:
             print("Login failed after 5 times.")
             conn.close()
-            exit()
+            exit(0)
         print(f"Invalid password. Try again. Attempt: {count}")
         count += 1
         password = getpass("Enter your password: ")
@@ -211,7 +218,7 @@ def file_manage(user_id, conn, cursor):
             username = cursor.fetchone()[0]
             print(f"'{username}' signed out.")
             conn.close()
-            exit()
+            exit(0)
 
         else:
             print("Invalid choice. Please try again.")
