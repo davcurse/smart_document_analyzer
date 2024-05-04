@@ -1,9 +1,9 @@
 # Smart Document Analyzer
 
-### EC530 Project2
+### EC530 Final Project
 #### David Li
 
-An easy to use command-line based program to store, view, and manipulate documents with secure user authentication and history backtracking.
+An easy to use command-line based program to store, view, manipulate, and summarize documents with secure user authentication and history backtracking.
 
 ## Features
 
@@ -12,32 +12,39 @@ An easy to use command-line based program to store, view, and manipulate documen
 - Word count for uploaded files (.txt, .doc, .docx, .pdf)
 - Logging of user actions and application events
 - Database management and file deletion options
+- Summarization of documents and additional links suggestions
 
 ## Requirements
 
 - Python 3.x
 - SQLite3
-- PyPDF2
+- PyPDF
 - python-docx
+- logging
+- nltk
+
 
 ## Installation
 
 1. Clone the repository
-2. Run the application with ```python3.11 test_main.py``` or python3.x version of your choice
+2. Run the application with ```python3.11 smart_doc.py``` or python3.x version of your choice
 3. Once logged in, you can:
 - View uploaded files
 - Upload new files
 - Delete files
+- Summarize uploaded files
 - Log out
 
 4. The application supports the following command-line arguments:
+- `-a`: Run program!
 - `-c`: Clean the database and delete all uploaded files
 - `-g`: Generate a new database for testing
 - `-r`: Clean and generate a new database
 
 ## File Structure
 
-- `test_main.py`: The main entry point of the application
+- `smart_doc.py`: Main executable for program
+- `test_main.py`: Backend testing implementation
 - `file.py`: Contains functions for user registration, login, and file management
 - `database.py`: Handles database initialization and creation of tables
 - `fullclean_db.py`: Provides functions for clearing the database and deleting files
@@ -49,6 +56,12 @@ An easy to use command-line based program to store, view, and manipulate documen
 The application logs various events and user actions to the `app.log` file. The log file includes timestamps, log levels, and log messages for tracking and debugging purposes.
 
 ## Example Use
+<p align="center">
+<img src="./images/6.png" width="80%">
+</p>
+<p align="center">
+Must run smartdoc application with an argument tag.
+</p>
 <p align="center">
 <img src="./images/2.png" width="80%">
 </p>
@@ -78,6 +91,24 @@ Viewing files. (Textbooks have large word counts!)
 </p>
 <p align="center">
 Deleting file clears it from the database for the logged in user and removes from stored directory.
+</p>
+<p align="center">
+<img src="./images/7.png" width="80%">
+</p>
+<p align="center">
+Viewing summary of the file. (Chapter on Palestine History)
+</p>
+<p align="center">
+<img src="./images/8.png" width="80%">
+</p>
+<p align="center">
+Viewing summary of the file not only includes keywords and a summary but also related links pertaining to the topic!
+</p>
+<p align="center">
+<img src="./images/9.png" width="80%">
+</p>
+<p align="center">
+Docker file implementation. Requirements.txt can be seen in source code.
 </p>
 
 

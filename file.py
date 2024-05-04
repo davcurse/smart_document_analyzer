@@ -7,6 +7,13 @@ import logging
 import pypdf
 import re
 import docx
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import nltk
+from heapq import nlargest
+
+nltk.download('stopwords', quiet=True)
+nltk.download('punkt', quiet=True)
 
 
 def register_user(conn, cursor, username, password):
@@ -72,6 +79,42 @@ def login_user(conn, cursor, username, password):
     return existing_user[0]  # Return the user ID
 
 
+freq_dist = {}
+
+
+def extract_keywords(text, num_keywords=10):
+    stop_words = set(stopwords.words('english'))
+    words = word_tokenize(text)
+
+    for word in words:
+        if word.lower() not in stop_words:
+            if word.lower() not in freq_dist.keys():
+                freq_dist[word.lower()] = 1
+            else:
+                freq_dist[word.lower()] += 1
+
+    keywords = nlargest(num_keywords, freq_dist, key=freq_dist.get)
+    return keywords
+
+
+def summarize_text(text, num_sentences=3):
+    sentences = text.split(". ")
+    sentence_scores = {}
+
+    for sentence in sentences:
+        for word in word_tokenize(sentence.lower()):
+            if word in freq_dist.keys():
+                if sentence not in sentence_scores.keys():
+                    sentence_scores[sentence] = freq_dist[word]
+                else:
+                    sentence_scores[sentence] += freq_dist[word]
+
+    summary_sentences = nlargest(num_sentences, sentence_scores,
+                                 key=sentence_scores.get)
+    summary = " ".join(summary_sentences)
+    return summary
+
+
 def count_words(file_path):
     _, extension = os.path.splitext(file_path)
     if extension == '.pdf':
@@ -107,8 +150,9 @@ def file_manage(user_id, conn, cursor):
         print("1. View files")
         print("2. Upload a file")
         print("3. Delete a file")
-        print("4. Log out")
-        choice = input("Enter your choice (1-4): ")
+        print("4. View summary of a file")
+        print("5. Log out")
+        choice = input("Enter your choice (1-5): ")
         if choice == '1':
             # View files
             cursor.execute("SELECT * FROM uploaded_files WHERE user_id=?",
@@ -146,7 +190,7 @@ def file_manage(user_id, conn, cursor):
                 destination_path = os.path.join(upload_folder, filename)
                 shutil.copy2(filepath, destination_path)
 
-                # Count number of words in pdf
+                # Count number of words in pdf/doc/docx/txt
                 word_count = count_words(filepath)
 
                 # Insert uploaded folder into database
@@ -211,8 +255,46 @@ def file_manage(user_id, conn, cursor):
                     print("Deletion cancelled.")
             else:
                 print("\nYou have no files to delete.")
-
         elif choice == '4':
+            cursor.execute("SELECT * FROM uploaded_files WHERE user_id=?",
+                           (user_id,))
+            files = cursor.fetchall()
+            if files:
+                print("Your files:")
+                for file in files:
+                    print(f"ID: {file[0]}, {file[2]}")
+
+                file_id = input("Enter the ID of the file to view summary"
+                                " (0 to cancel): ")
+                if file_id != '0':
+                    cursor.execute(
+                        "SELECT * FROM uploaded_files WHERE id=? AND\
+                        user_id=?",
+                        (file_id, user_id)
+                    )
+                    file = cursor.fetchone()
+                    if file:
+                        pdf_reader = pypdf.PdfReader(file[4])
+                        text = ""
+                        for page in pdf_reader.pages:
+                            text += page.extract_text()
+
+                        keywords = extract_keywords(text)
+                        print("\nKeywords:", keywords)
+                        summary = summarize_text(text)
+                        print("\nSummary:", summary)
+                        print("\nRelated links:")
+                        for terms in keywords:
+                            if terms.isalpha():
+                                print("https://www.google.com/search?q="
+                                      + terms)
+                    else:
+                        print("File not found.")
+                else:
+                    print("Action canceled.")
+            else:
+                print("\nYou have no files to view.")
+        elif choice == '5':
             cursor.execute("SELECT username FROM data WHERE id = ?",
                            (user_id,))
             username = cursor.fetchone()[0]
