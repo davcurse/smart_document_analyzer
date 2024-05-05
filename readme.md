@@ -51,14 +51,17 @@ An easy to use command-line based program to store, view, manipulate, and summar
 - `Database/database.db`: SQLite database file for storing user information and uploaded files
 - `uploaded_files/`: Directory for storing all uploaded files
 
+
 ## Logging
 
 The application logs various events and user actions to the `app.log` file. The log file includes timestamps, log levels, and log messages for tracking and debugging purposes.
 
 ## Demo
-<p align = "center">
-https://github.com/davcurse/smart_document_analyzer/assets/87276972/d6f70ddc-0640-4a3c-ba6d-fee0f1f7d984
-</p>
+
+
+https://github.com/davcurse/smart_document_analyzer/assets/87276972/581e923c-13d2-4aa0-94e0-986271e11950
+
+
 
 ## Example Use Screenshots
 <p align="center">
