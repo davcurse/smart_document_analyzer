@@ -72,7 +72,7 @@ Cleaning and generating new database.
 <img src="./images/1.png" width="80%">
 </p>
 <p align="center">
-Registration Prompt.
+Registration prompt. All registered users are securely store LOCALLY only! Can be seen in database.py and database folder.
 </p>
 <p align="center">
 <img src="./images/3.png" width="80%">
