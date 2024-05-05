@@ -57,7 +57,7 @@ The application logs various events and user actions to the `app.log` file. The 
 
 ## Demo
 <p align = "center">
-<video src='./images/ec530_1.mov' width=80%>
+https://github.com/davcurse/smart_document_analyzer/assets/87276972/d6f70ddc-0640-4a3c-ba6d-fee0f1f7d984
 </p>
 
 ## Example Use Screenshots
