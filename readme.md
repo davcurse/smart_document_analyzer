@@ -55,7 +55,11 @@ An easy to use command-line based program to store, view, manipulate, and summar
 
 The application logs various events and user actions to the `app.log` file. The log file includes timestamps, log levels, and log messages for tracking and debugging purposes.
 
-## Example Use
+## Demo
+<p align = "center">
+<video src='./images/ec530_1.mov' width=80%>
+</p>
+## Example Use Screenshots
 <p align="center">
 <img src="./images/6.png" width="80%">
 </p>
