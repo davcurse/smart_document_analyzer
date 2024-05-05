@@ -78,7 +78,7 @@ Registration prompt. All registered users are securely store LOCALLY only! Can b
 <img src="./images/3.png" width="80%">
 </p>
 <p align="center">
-Successful login and file manage options.
+Successful login and file manage options. Uploaded files can only be viewed and manipulated by the logged in user. Other users have no access to uploaded files.
 </p>
 <p align="center">
 <img src="./images/4.png" width="80%">
