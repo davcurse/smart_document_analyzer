@@ -59,6 +59,7 @@ The application logs various events and user actions to the `app.log` file. The 
 <p align = "center">
 <video src='./images/ec530_1.mov' width=80%>
 </p>
+
 ## Example Use Screenshots
 <p align="center">
 <img src="./images/6.png" width="80%">
